@@ -1,0 +1,122 @@
+╔══════════════════════════════════════════════════════════════╗
+║  GEMM + bias + ReLU: v1 (separate) vs v2 (fused) vs v3    ║
+╚══════════════════════════════════════════════════════════════╝
+
+──────────────── M=512  N=512  K=512 ────────────────
+
+=== v1: Separate Kernels (cuBLAS GEMM + bias_relu) ===
+  M=512  N=512  K=512
+
+  v1 (separate)                     0.019 ms   14.20 TFLOPS
+  Reference output saved to ref_output.bin
+
+=== v2: Fused Serial (WMMA GEMM then bias+ReLU) ===
+  M=512  N=512  K=512
+
+  v2 (fused serial)                 0.117 ms    2.31 TFLOPS
+  Verification vs v1: PASS (0 mismatches / 262144)
+
+=== v3: Fused Concurrent (TC warps + CC warps pipelined) ===
+  M=512  N=512  K=512
+  TC warps=4, CC warps=4, tiles_per_block=4
+
+  Grid: (8, 2), Block: 256 threads
+  Padded: M=512 N=512 K=512
+  v3 (fused concurrent)             0.112 ms    2.41 TFLOPS
+  Verification vs v1: PASS (0 mismatches / 262144)
+
+──────────────── M=1024  N=1024  K=1024 ────────────────
+
+=== v1: Separate Kernels (cuBLAS GEMM + bias_relu) ===
+  M=1024  N=1024  K=1024
+
+  v1 (separate)                     0.036 ms   59.98 TFLOPS
+  Reference output saved to ref_output.bin
+
+=== v2: Fused Serial (WMMA GEMM then bias+ReLU) ===
+  M=1024  N=1024  K=1024
+
+  v2 (fused serial)                 0.274 ms    7.83 TFLOPS
+  Verification vs v1: PASS (0 mismatches / 1048576)
+
+=== v3: Fused Concurrent (TC warps + CC warps pipelined) ===
+  M=1024  N=1024  K=1024
+  TC warps=4, CC warps=4, tiles_per_block=4
+
+  Grid: (16, 4), Block: 256 threads
+  Padded: M=1024 N=1024 K=1024
+  v3 (fused concurrent)             0.211 ms   10.18 TFLOPS
+  mismatch [7,324]: 250.2500 vs 249.0000
+  mismatch [8,700]: 256.7500 vs 255.5000
+  mismatch [10,419]: 254.0000 vs 252.8750
+  mismatch [10,425]: 261.7500 vs 263.0000
+  mismatch [15,52]: 244.3750 vs 245.5000
+  Verification vs v1: CHECK (598 mismatches / 1048576)
+
+──────────────── M=2048  N=2048  K=2048 ────────────────
+
+=== v1: Separate Kernels (cuBLAS GEMM + bias_relu) ===
+  M=2048  N=2048  K=2048
+
+  v1 (separate)                     0.144 ms  119.47 TFLOPS
+  Reference output saved to ref_output.bin
+
+=== v2: Fused Serial (WMMA GEMM then bias+ReLU) ===
+  M=2048  N=2048  K=2048
+
+  v2 (fused serial)                 1.325 ms   12.97 TFLOPS
+  mismatch [161342]: 505.0000 vs 502.7500
+  mismatch [714140]: 529.5000 vs 527.0000
+  mismatch [812214]: 500.5000 vs 498.2500
+  mismatch [1020385]: 505.0000 vs 502.7500
+  mismatch [1127784]: 493.5000 vs 495.7500
+  Verification vs v1: CLOSE ENOUGH (11 mismatches / 4194304)
+
+=== v3: Fused Concurrent (TC warps + CC warps pipelined) ===
+  M=2048  N=2048  K=2048
+  TC warps=4, CC warps=4, tiles_per_block=4
+
+  Grid: (32, 8), Block: 256 threads
+  Padded: M=2048 N=2048 K=2048
+  v3 (fused concurrent)             0.983 ms   17.49 TFLOPS
+  mismatch [0,60]: 503.5000 vs 502.2500
+  mismatch [0,104]: 510.0000 vs 511.2500
+  mismatch [0,241]: 503.5000 vs 504.7500
+  mismatch [0,314]: 495.0000 vs 496.2500
+  mismatch [0,344]: 513.5000 vs 512.0000
+  Verification vs v1: CHECK (53749 mismatches / 4194304)
+
+──────────────── M=4096  N=4096  K=4096 ────────────────
+
+=== v1: Separate Kernels (cuBLAS GEMM + bias_relu) ===
+  M=4096  N=4096  K=4096
+
+  v1 (separate)                     0.713 ms  192.86 TFLOPS
+  Reference output saved to ref_output.bin
+
+=== v2: Fused Serial (WMMA GEMM then bias+ReLU) ===
+  M=4096  N=4096  K=4096
+
+  v2 (fused serial)                 7.951 ms   17.29 TFLOPS
+  mismatch [0]: 996.5000 vs 993.0000
+  mismatch [1]: 1020.5000 vs 1018.0000
+  mismatch [2]: 1000.0000 vs 1003.5000
+  mismatch [4]: 1010.0000 vs 1007.0000
+  mismatch [6]: 1018.0000 vs 1015.5000
+  Verification vs v1: CLOSE ENOUGH (5985693 mismatches / 16777216)
+
+=== v3: Fused Concurrent (TC warps + CC warps pipelined) ===
+  M=4096  N=4096  K=4096
+  TC warps=4, CC warps=4, tiles_per_block=4
+
+  Grid: (64, 16), Block: 256 threads
+  Padded: M=4096 N=4096 K=4096
+  v3 (fused concurrent)             6.311 ms   21.78 TFLOPS
+  mismatch [0,0]: 996.5000 vs 993.0000
+  mismatch [0,1]: 1020.5000 vs 1018.0000
+  mismatch [0,2]: 1000.0000 vs 1003.5000
+  mismatch [0,3]: 1001.0000 vs 1002.5000
+  mismatch [0,4]: 1010.0000 vs 1007.0000
+  Verification vs v1: CHECK (10169129 mismatches / 16777216)
+
+Done.
